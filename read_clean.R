@@ -199,8 +199,6 @@ total_study <- total_study1
 final_participantnum = nrow(total_study1)
 
 
-
-
 # #initial_partnum - removed4missing - removed4invalid
 # if (final_participantnum != initial_partnum - removed4missing  - 
 #     removed4failure - ncobasinvalid - ncobasindeterminate) 
