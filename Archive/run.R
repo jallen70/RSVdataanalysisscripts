@@ -1,9 +1,9 @@
 # R script run diagnostic accuracy stats 
-
+#test new git
 # clear the global environment
 rm(list = ls())
 #path to the working directory
-wd<- "~/Documents/DEC WORK/NCL_DEC0051 RSV cobas Liat test  - clinical validity study"
+wd<- "Z:/DEC methods/tools - R/Working_project_folders/NCL_DEC0051 RSV cobas Liat test  - clinical validity study"
 setwd(wd)
 
 #load in packages required
@@ -31,9 +31,8 @@ dig <- 3 # number of decimals points
 #create a data set to calculate Tps, Tns, Fps, Fns
 
   cutoffdate <- maxdate
-  
-  #rsvTxT <- TxTanalysis(total_study,cutoffdate,"RSV")
-  rsvTxT <- TxTanalysis2(total_study$cLoutcome,total_study$PCRoutcome,"RSV")
+  source("functions/2x2analysis.R")
+  rsvTxT <- TxTanalysis(total_study,cutoffdate,"RSV")
   
   Tp <- rsvTxT[,1]
   Fp <- rsvTxT[,2]
@@ -75,19 +74,7 @@ dig <- 3 # number of decimals points
   #Display overall 2x2 table
   rsvtable_srh <- Dx2by2fun()
   
-  # need to now conduct 2x2 analysis for repeat cobas testing. 
-  
-  repeat_testing <- testing_outcome(total_study$rcobasresult_rsv, total_study$rcobasresult_flua, total_study$rcobasresult_flub)
-  
-  total_study$rcLoutcome <- repeat_testing$outcome
-  
-  total_study$cLoutcome_overall <- total_study$rcLoutcome 
-  total_study$cLoutcome_overall[total_study$cobastest != "invalid retest "] <- total_study$cLoutcome
-  rsvTxT_repeat <- TxTanalysis2(total_study$cLoutcome_overall,total_study$PCRoutcome,"RSV")
-  
-  # also 2x2 analysis for discrepany testing
-  
-  
+
 #   source("functions/accstats.R")   # writes out sens and spec tables, and ppv and npv tables with CI to csv files
 #   accstats(results)
 #   
