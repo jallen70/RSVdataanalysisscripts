@@ -149,10 +149,10 @@ TxTanalysis_loc <- function(data,cutoffdate,virus){
   
   if (virus == "RSV") pcrvirus <- "RSV/Rhino"
   
-  df = ddply(data, ~Location, summarise, Tp = sum(cLoutcome == virus & (PCRoutcome == virus | PCRoutcome == pcrvirus)),
-           Fp = sum(cLoutcome == virus & PCRoutcome != virus & PCRoutcome != pcrvirus), 
-           Tn = sum(cLoutcome != virus & PCRoutcome != virus & PCRoutcome != pcrvirus),
-           Fn = sum(cLoutcome != virus & (PCRoutcome == virus | PCRoutcome == pcrvirus)))
+  df = ddply(data, ~Location, summarise, Tp = sum(data$cLoutcome == virus & (data$PCRoutcome == virus | data$PCRoutcome == pcrvirus)),
+           Fp = sum(data$cLoutcome == virus & data$PCRoutcome != virus & data$PCRoutcome != pcrvirus), 
+           Tn = sum(data$cLoutcome != virus & data$PCRoutcome != virus & data$PCRoutcome != pcrvirus),
+           Fn = sum(data$cLoutcome != virus & (data$PCRoutcome == virus | data$PCRoutcome == pcrvirus)))
   
  
   # return list to be used in main program

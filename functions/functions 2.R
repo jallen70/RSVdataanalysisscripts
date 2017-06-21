@@ -144,17 +144,79 @@ return(result)
 
 }
 
+
+
+
+# function to create final outcome column for index and reference tests for TxT analysis
+
+testing_outcome <- function(col1, col2, col3){
+  
+  mydata <- cbind.data.frame(col1,col2,col3)
+  colnames(mydata) <- c("col1", "col2", "col3")
+  mydata$outcome <- ""
+  
+  mydata$outcome[mydata$col1 == "RSV negative" & 
+                   mydata$col2 == "Flu A negative" & 
+                   mydata$col3 == "Flu B negative"] <- "Neg"
+  mydata$outcome[mydata$col1 == "RSV positive" & 
+                   mydata$col2 == "Flu A negative" & 
+                   mydata$col3 == "Flu B negative"] <- "RSV"
+  mydata$outcome[mydata$col1 == "RSV negative" & 
+                   mydata$col2 == "Flu A positive" & 
+                   mydata$col3 == "Flu B negative"] <- "FluA"
+  mydata$outcome[mydata$col1 == "RSV negative" & 
+                   mydata$col2 == "Flu A negative" & 
+                   mydata$col3 == "Flu B positive"] <- "FluB"
+  
+  # are there any combined results?
+  mydata$outcome[mydata$col1 == "RSV positive" & 
+                   mydata$col2 == "Flu A negative" & 
+                   mydata$col3 == "Flu B positive"] <- "RSV/FluB"
+  mydata$outcome[mydata$col1 == "RSV positive" & 
+                   mydata$col2 == "Flu A positive" & 
+                   mydata$col3 == "Flu B negative"] <- "RSV/FluA"
+  mydata$outcome[mydata$col1 == "RSV negative" & 
+                   mydata$col2 == "Flu A positive" & 
+                   mydata$col3 == "Flu B positive"] <- "FluA/FluB"
+  mydata$outcome[mydata$col1 == "RSV positive" & 
+                   mydata$col2 == "Flu A positive" & 
+                   mydata$col3 == "Flu B positive"] <- "RSV/FluA/FluB"
+  
+  
+  
+  return(mydata)
+}
+
+TxTanalysis2 <- function(outcome1, outcome2, virus){
+  
+  
+  if (virus == "RSV") pcrvirus <- "RSV/Rhino"
+  
+  Tp = sum(outcome1 == virus & (outcome2 == virus | outcome2 == pcrvirus))
+  Fp = sum(outcome1 == virus & outcome2 != virus & outcome2 != pcrvirus)
+  Tn = sum(outcome1 != virus & outcome2 != virus & outcome2 != pcrvirus)
+  Fn = sum(outcome1 != virus & (outcome2 == virus | outcome2 == pcrvirus))
+  
+  result = cbind(Tp,Fp,Tn,Fn)
+  # return list to be used in main program
+  #result <- list(Tp = Tp, Fp = Fp, Tn = Tn, Fn = Fn)
+  
+  return(result)
+  
+}
+
+
 TxTanalysis_loc <- function(data,cutoffdate,virus){
   
   
   if (virus == "RSV") pcrvirus <- "RSV/Rhino"
   
   df = ddply(data, ~Location, summarise, Tp = sum(cLoutcome == virus & (PCRoutcome == virus | PCRoutcome == pcrvirus)),
-           Fp = sum(cLoutcome == virus & PCRoutcome != virus & PCRoutcome != pcrvirus), 
-           Tn = sum(cLoutcome != virus & PCRoutcome != virus & PCRoutcome != pcrvirus),
-           Fn = sum(cLoutcome != virus & (PCRoutcome == virus | PCRoutcome == pcrvirus)))
+             Fp = sum(cLoutcome == virus & PCRoutcome != virus & PCRoutcome != pcrvirus), 
+             Tn = sum(cLoutcome != virus & PCRoutcome != virus & PCRoutcome != pcrvirus),
+             Fn = sum(cLoutcome != virus & (PCRoutcome == virus | PCRoutcome == pcrvirus)))
   
- 
+  
   # return list to be used in main program
   #result <- list(Tp = Tp, Fp = Fp, Tn = Tn, Fn = Fn)
   
