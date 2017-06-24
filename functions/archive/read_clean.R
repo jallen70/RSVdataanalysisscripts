@@ -45,12 +45,6 @@ total_study_full$pcrfailurereason <- as.character(total_study_full$pcrfailurerea
 total_study_full$rpcrcycno <- as.integer(total_study_full$rpcrcycno)
 
 ################################################################################################
-# call script for demographic analysis
-source("functions/demographics.R")
-
-demographics(total_study_full)
-##############################################################################################
-
 
 # How many initial participants do we have?  Before exclusions?
 initial_partnum = nrow(total_study_full)
