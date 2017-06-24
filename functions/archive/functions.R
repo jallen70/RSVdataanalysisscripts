@@ -128,7 +128,7 @@ timeconv <- function(input) {
 
 TxTanalysis <- function(data,cutoffdate,virus){
   
-  pcrvirus <- "pcrvirus"
+  
   if (virus == "RSV") pcrvirus <- "RSV/Rhino"
   
   Tp = sum(data$cLoutcome == virus & (data$PCRoutcome == virus | data$PCRoutcome == pcrvirus))
@@ -189,7 +189,7 @@ testing_outcome <- function(col1, col2, col3){
 
 TxTanalysis2 <- function(outcome1, outcome2, virus){
   
-  pcrvirus <- "pcrvirus"
+  
   if (virus == "RSV") pcrvirus <- "RSV/Rhino"
   
   Tp = sum(outcome1 == virus & (outcome2 == virus | outcome2 == pcrvirus))
@@ -206,43 +206,22 @@ TxTanalysis2 <- function(outcome1, outcome2, virus){
 }
 
 
-TxTanalysis_loc <- function(data, virus, pcrvirus){
+TxTanalysis_loc <- function(data,cutoffdate,virus){
   
- 
-   df = ddply(data, ~Location, summarise, Tp = sum(cLoutcome == virus & (PCRoutcome == virus | PCRoutcome == pcrvirus)),
-             Fp = sum(cLoutcome == virus & PCRoutcome != virus ), # & PCRoutcome != pcrvirus), 
-             Tn = sum(cLoutcome != virus & PCRoutcome != virus), # & PCRoutcome != pcrvirus),
-             Fn = sum(cLoutcome != virus & (PCRoutcome == virus))) # | PCRoutcome == pcrvirus)))
+  
+  if (virus == "RSV") pcrvirus <- "RSV/Rhino"
+  
+  df = ddply(data, ~Location, summarise, Tp = sum(cLoutcome == virus & (PCRoutcome == virus | PCRoutcome == pcrvirus)),
+             Fp = sum(cLoutcome == virus & PCRoutcome != virus & PCRoutcome != pcrvirus), 
+             Tn = sum(cLoutcome != virus & PCRoutcome != virus & PCRoutcome != pcrvirus),
+             Fn = sum(cLoutcome != virus & (PCRoutcome == virus | PCRoutcome == pcrvirus)))
   
   
   # return list to be used in main program
   #result <- list(Tp = Tp, Fp = Fp, Tn = Tn, Fn = Fn)
- 
+  
   return(df)
   
-}
-
-
-timedifferences <- function(x_date, x_time, y_date, y_time){
-  
-  x_date<- as.Date((x_date), "%d/%m/%Y")
-  y_date<- as.Date((y_date), "%d/%m/%Y")
-  
-  
-  x_time2 <- strptime(x_time, format='%H:%M')
-  x_time2 <- substr(x_time2, 11, 19) 
-  x_time2 <- str_c(x_date,x_time2) 
-  x_time2 <- as.POSIXlt(x_time2, tz = "GMT", format='%Y-%m-%d %H:%M:%S') 
-  
-  
-  y_time2 <- strptime(y_time, format='%H:%M')
-  y_time2 <- substr(y_time2, 11, 19) 
-  y_time2 <- str_c(y_date,y_time2) 
-  y_time2 <- as.POSIXlt(y_time2, tz = "GMT", format='%Y-%m-%d %H:%M:%S') 
-  
-  difftime2 = as.numeric(difftime(x_time2,y_time2, units = "days")) #, "%Y-%m-%d %H:%M:%S")
-  
-
 }
 
 
