@@ -3,7 +3,8 @@
 # clear the global environment
 rm(list = ls())
 #path to the working directory
-wd<- "~/Documents/DEC WORK/NCL_DEC0051 RSV cobas Liat test  - clinical validity study"
+#wd<- "~/Documents/DEC WORK/NCL_DEC0051 RSV cobas Liat test  - clinical validity study"
+wd <- "Z:/DEC methods/tools - R/Working_project_folders/NCL_DEC0051 RSV cobas Liat test  - clinical validity study"
 setwd(wd)
 
 #load in packages required
@@ -17,11 +18,17 @@ source("functions/functions.R")
 source("functions/read_clean.R")
 readingfiles()
 
+library(gridExtra)
+
 ########################################################################
 
 Cohort <- T
 alpha <- 0.05 # confidence level
 dig <- 3 # number of decimals points 
+tabfilepath <- "output/pilot/"
+figfilepath <- "figures/"
+save_tables  = "T" 
+now <- format(Sys.time(), "%b%d%H%M%S")
 
 ################## ANALYSIS PRINT OUT ##################################
 
@@ -32,9 +39,9 @@ dig <- 3 # number of decimals points
 
   cutoffdate <- maxdate
   
-  #rsvTxT <- TxTanalysis(total_study,cutoffdate,"RSV")
+ 
   rsvTxT <- TxTanalysis2(total_study$cLoutcome,total_study$PCRoutcome,"RSV")
-  
+ 
   Tp <- rsvTxT[,1]
   Fp <- rsvTxT[,2]
   Tn <- rsvTxT[,3]
@@ -42,6 +49,8 @@ dig <- 3 # number of decimals points
   
   #Display overall 2x2 table
   rsvtable <- Dx2by2fun()
+  filename <- paste0( tabfilepath,now,"rsvaccuracyresults.csv")
+  write.table(rsvtable, file = filename, sep = ",",  col.names=T, row.names=T)
   
   message(paste("Combined site sensitivity",round(100*SnSp(Tp,Fn),dig)),"% (",
           round(100*SnSpCIs(alpha,SnSp(Tp,Fn),Tp+Fn)$lower,dig),"-", 
@@ -54,8 +63,20 @@ dig <- 3 # number of decimals points
           ")%")
   
   
-  rsvTxT_loc <- TxTanalysis_loc(total_study,cutoffdate,"RSV")
+  virus <- "RSV"
+  data <- total_study
+  
+  if (virus == "RSV") {
+    pcrvirus <- "RSV/Rhino"
+  } else {
+    pcrvirus <- "pcrvirus"
+  }
+  
+  rsvTxT_loc <- TxTanalysis_loc(total_study, virus, pcrvirus)
   rownames(rsvTxT_loc) <- rsvTxT_loc[,1]  
+  rsvTxT_loc
+  
+ 
   
   #GNCH 
   Tp <- rsvTxT_loc$Tp[1]
@@ -65,6 +86,7 @@ dig <- 3 # number of decimals points
   
   #Display overall 2x2 table
   rsvtable_gnch <- Dx2by2fun()
+  rsvtable_gnch
   
   #SRH 
   Tp <- rsvTxT_loc$Tp[2]
@@ -74,6 +96,7 @@ dig <- 3 # number of decimals points
   
   #Display overall 2x2 table
   rsvtable_srh <- Dx2by2fun()
+  rsvtable_srh
   
   # need to now conduct 2x2 analysis for repeat cobas testing. 
   
@@ -84,8 +107,23 @@ dig <- 3 # number of decimals points
   total_study$cLoutcome_overall <- total_study$rcLoutcome 
   total_study$cLoutcome_overall[total_study$cobastest != "invalid retest "] <- total_study$cLoutcome
   rsvTxT_repeat <- TxTanalysis2(total_study$cLoutcome_overall,total_study$PCRoutcome,"RSV")
+  rsvTxT_repeat
+  
+  Tp <- rsvTxT_repeat[,1]
+  Fp <- rsvTxT_repeat[,2]
+  Tn <- rsvTxT_repeat[,3]
+  Fn <- rsvTxT_repeat[,4]
+  
+  
+  rsvtable2 <- Dx2by2fun()
+  filename <- paste0( tabfilepath,now,"rsvaccuracyresults_withinvalids.csv")
+  write.table(rsvtable2, file = filename, sep = ",",  col.names=T, row.names=T)
   
   # also 2x2 analysis for discrepany testing
+  
+  # only one for discrepant testing in pilot study
+  
+  
   
   
 #   source("functions/accstats.R")   # writes out sens and spec tables, and ppv and npv tables with CI to csv files
@@ -94,19 +132,23 @@ dig <- 3 # number of decimals points
 #   # plot of predictive values over time and with prevalence
 #   source("functions/predvalues_time.R")
 #   
-  ###### AVERAGE LENGTH OF TIME FOR PCR RESULT #######################
+#   ###### AVERAGE LENGTH OF TIME FOR PCR RESULT #######################
   source("functions/timediff.R")
   
-  timediff(total_study,difftime2)
+  total_study <- total_study %>%  
+    dplyr::rowwise() %>% dplyr::mutate(difftime = timedifferences(pcr_dateresultavail, pcr_timeresultavail, cobasdate, cobastime))
   
-  #average time between results per location
-  averagedifftime= ddply(total_study,~Location, summarise, 
-                         AvNumDaysBetwRes = round(mean(difftime, na.rm=T),digits = 0))
-  row.names(averagedifftime) = averagedifftime[,1]
-  averagedifftime$Location <- NULL
-  
-  averagedifftime
-  
+#   
+   timediff(total_study)
+#   
+#   #average time between results per location
+#   averagedifftime= ddply(total_study,~Location, summarise, 
+#                          AvNumDaysBetwRes = round(mean(difftime, na.rm=T),digits = 0))
+#   row.names(averagedifftime) = averagedifftime[,1]
+#   averagedifftime$Location <- NULL
+#   
+#   averagedifftime
+#   
   ### demographic - average age
   
   ### diagnosis on admission
